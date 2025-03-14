@@ -76,13 +76,13 @@ resource "azurerm_vpn_server_configuration_policy_group" "this" {
 }
 
 resource "azurerm_point_to_site_vpn_gateway" "this" {
-  resource_group_name                 = var.resource_group_name
-  location                            = var.location
-  name                                = var.p2s_gateway.name
-  virtual_hub_id                      = var.virtual_hub_id
-  vpn_server_configuration_id         = azurerm_vpn_server_configuration.this.id
-  scale_unit                          = var.p2s_gateway.scale_unit
-  dns_servers                         = var.p2s_gateway.dns_servers
+  resource_group_name         = var.resource_group_name
+  location                    = var.location
+  name                        = var.p2s_gateway.name
+  virtual_hub_id              = var.virtual_hub_id
+  vpn_server_configuration_id = azurerm_vpn_server_configuration.this.id
+  scale_unit                  = var.p2s_gateway.scale_unit
+  dns_servers                 = var.p2s_gateway.dns_servers
 
   dynamic "connection_configuration" {
     for_each = var.p2s_configuration != null ? var.p2s_configuration : {}

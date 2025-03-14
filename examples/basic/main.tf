@@ -52,12 +52,12 @@ module "vwan" {
 module "p2s" {
   source = "../../"
 
-  resource_group_name      = "vwan-rg"
-  location                 = "westeurope"
-  virtual_hub_id           = module.vwan.vhub_ids["weu"]
+  resource_group_name = "vwan-rg"
+  location            = "westeurope"
+  virtual_hub_id      = module.vwan.vhub_ids["weu"]
 
   vpn_server_configuration = {
-    name = "vpnserverconfig"
+    name                     = "vpnserverconfig"
     vpn_authentication_types = ["AAD"]
     azure_active_directory_authentication = {
       audience = "c632b3df-fb67-4d84-bdcf-b95ad541b5c8"
@@ -66,15 +66,15 @@ module "p2s" {
   }
 
   p2s_gateway = {
-    name = "vpnserverconfig-p2s"
+    name        = "vpnserverconfig-p2s"
     dns_servers = ["10.10.0.132"]
   }
 
   vpn_server_policy_group = {
     others = {
-      name = "engineers"
+      name       = "engineers"
       is_default = false
-      priority = 0
+      priority   = 0
       policy = {
         "1" = {
           name  = "<AD-Group-Name>"
@@ -85,9 +85,9 @@ module "p2s" {
     }
     #Should be the last one, since it will be de default
     default = {
-      name = "honeycomb"
+      name       = "honeycomb"
       is_default = true
-      priority = 1
+      priority   = 1
       policy = {
         "1" = {
           name  = "honeycomb"

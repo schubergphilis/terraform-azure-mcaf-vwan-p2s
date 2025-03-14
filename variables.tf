@@ -15,9 +15,9 @@ variable "virtual_hub_id" {
 
 variable "vpn_server_configuration" {
   type = object({
-    name = string
+    name                     = string
     vpn_authentication_types = optional(list(string), ["AAD"])
-    vpn_protocols = optional(list(string), ["OpenVPN"])
+    vpn_protocols            = optional(list(string), ["OpenVPN"])
     azure_active_directory_authentication = optional(object({
       audience = string
       tenantid = string
@@ -41,7 +41,7 @@ variable "vpn_server_configuration" {
       thumbprint = string
     }), null)
   })
-  default = null
+  default     = null
   description = <<DESCRIPTION
 A VPN Server Configuration block supports the following:
 
@@ -80,10 +80,10 @@ A VPN Server Configuration block supports the following:
 
 variable "p2s_gateway" {
   type = object({
-    name = optional(string, "p2s")
+    name                                = optional(string, "p2s")
     routing_preference_internet_enabled = optional(bool, false)
-    dns_servers = optional(list(string), [])
-    scale_unit = optional(number, 1)
+    dns_servers                         = optional(list(string), [])
+    scale_unit                          = optional(number, 1)
   })
   description = <<DESCRIPTION
 The Point-to-Site VPN Gateway configuration.
@@ -129,9 +129,9 @@ DESCRIPTION
 
 variable "vpn_server_policy_group" {
   type = map(object({
-    name = string
+    name       = string
     is_default = optional(bool, false)
-    priority = number
+    priority   = number
     policy = map(object({
       name  = string
       type  = string
