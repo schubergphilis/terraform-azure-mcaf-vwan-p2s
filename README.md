@@ -98,5 +98,8 @@ No modules.
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_p2s_gateway_id"></a> [p2s\_gateway\_id](#output\_p2s\_gateway\_id) | The ID of the Point-to-Site VPN Gateway. |
+| <a name="output_vpn_server_id"></a> [vpn\_server\_id](#output\_vpn\_server\_id) | The ID of the VPN Server Configuration. |
 <!-- END_TF_DOCS -->
