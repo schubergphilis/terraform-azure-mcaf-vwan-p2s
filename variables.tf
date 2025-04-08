@@ -96,10 +96,18 @@ The Point-to-Site VPN Gateway configuration.
   DESCRIPTION
 }
 
+variable "internet_security_enabled" {
+  type        = bool
+  default     = true
+  description = <<DESCRIPTION
+    Whether internet security is enabled for the Point-to-Site VPN Gateway connections, it will include/remove 0.0.0.0/0 in the route table.
+    Although it seems you can set this per connection, this is not the case.
+  DESCRIPTION
+}
+
 variable "p2s_configuration" {
   type = map(object({
     name                      = optional(string, "P2SConnectionConfigDefault")
-    internet_security_enabled = optional(bool, true)
     vpn_client_address_pool = object({
       address_prefixes = list(string)
     })
