@@ -107,7 +107,7 @@ variable "internet_security_enabled" {
 
 variable "p2s_configuration" {
   type = map(object({
-    name                      = optional(string, "P2SConnectionConfigDefault")
+    name = optional(string, "P2SConnectionConfigDefault")
     vpn_client_address_pool = object({
       address_prefixes = list(string)
     })
