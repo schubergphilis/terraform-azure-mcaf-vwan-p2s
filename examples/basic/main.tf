@@ -18,7 +18,7 @@ locals {
 }
 
 module "vwan" {
-  source = "github.com/schubergphilis/terraform-azure-mcaf-vwan?ref=v0.8.0"
+  source = "github.com/schubergphilis/terraform-azure-mcaf-vwan?ref=v0.8.3"
 
   resource_group_name = "vwan-rg"
   location            = "westeurope"
@@ -32,12 +32,17 @@ module "vwan" {
     weu = {
       virtual_hub_name                  = "westeurope"
       location                          = "westeurope"
+      firewall_name                     = "firewall-weu"
+      firewall_policy_name              = "firewall-policy-weu"
+      routing_intent_name               = "routing-intent-weu"
       address_prefix                    = "10.10.0.0/23"
       firewall_sku_tier                 = "Standard"
       firewall_zones                    = ["1", "2", "3"]
       firewall_public_ip_count          = 1
       firewall_threat_intelligence_mode = "Alert"
       firewall_dns_proxy_enabled        = true
+      firewall_dns_servers              = ["10.10.0.132"]
+
     }
   }
 
