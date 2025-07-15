@@ -118,9 +118,10 @@ resource "azurerm_point_to_site_vpn_gateway" "this" {
       "Resource Type" = "Point-to-Site VPN Gateway"
     })
   )
+
   lifecycle {
-    ignore_changes = [ 
-      internet_security_enabled
-     ]
+    ignore_changes = [
+      connection_configuration[*].internet_security_enabled
+    ]
   }
 }
