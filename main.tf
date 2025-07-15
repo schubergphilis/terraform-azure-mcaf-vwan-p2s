@@ -89,7 +89,7 @@ resource "azurerm_point_to_site_vpn_gateway" "this" {
 
     content {
       name                      = connection_configuration.value.name
-      internet_security_enabled = var.internet_security_enabled
+      internet_security_enabled = false
 
       vpn_client_address_pool {
         address_prefixes = connection_configuration.value.vpn_client_address_pool.address_prefixes
@@ -118,10 +118,4 @@ resource "azurerm_point_to_site_vpn_gateway" "this" {
       "Resource Type" = "Point-to-Site VPN Gateway"
     })
   )
-
-  lifecycle {
-    ignore_changes = [
-      connection_configuration[*].internet_security_enabled
-    ]
-  }
 }
