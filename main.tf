@@ -89,6 +89,7 @@ resource "azurerm_point_to_site_vpn_gateway" "this" {
 
     content {
       name                      = connection_configuration.value.name
+      vpn_server_policy_group_name = connection_configuration.value.vpn_server_policy_group_name
       internet_security_enabled = var.internet_security_enabled
 
       vpn_client_address_pool {
