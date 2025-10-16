@@ -33,6 +33,40 @@ resource "azurerm_vpn_server_configuration" "this" {
     }
   }
 
+  dynamic "radius" {
+    for_each = [1]
+
+    content {
+      dynamic "server" {
+        for_each = try(var.vpn_server_configuration.radius.server, [])
+
+        content {
+          address = server.value.address
+          secret  = server.value.secret
+          score   = server.value.score
+        }
+      }
+
+      dynamic "client_root_certificate" {
+        for_each = try(var.vpn_server_configuration.radius.client_root_certificate, [])
+
+        content {
+          name       = client_root_certificate.value.name
+          thumbprint = client_root_certificate.value.thumbprint
+        }
+      }
+
+      dynamic "server_root_certificate" {
+        for_each = try(var.vpn_server_configuration.radius.server_root_certificate, [])
+
+        content {
+          name             = server_root_certificate.value.name
+          public_cert_data = server_root_certificate.value.public_cert_data
+        }
+      }
+    }
+  }
+
   dynamic "ipsec_policy" {
     for_each = var.vpn_server_configuration.ipsec_policy != null ? [1] : []
 

@@ -40,6 +40,21 @@ variable "vpn_server_configuration" {
       name       = string
       thumbprint = string
     }), null)
+    radius = optional(object({
+      server = list(object({
+        address = string
+        secret  = string
+        score   = optional(number)
+      }))
+      client_root_certificate = optional(list(object({
+        name       = string
+        thumbprint = string
+      })), null)
+      server_root_certificate = optional(list(object({
+        name             = string
+        public_cert_data = string
+      })), null)
+    }), null)
   })
   default     = null
   description = <<DESCRIPTION
