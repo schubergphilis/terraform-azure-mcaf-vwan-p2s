@@ -146,18 +146,6 @@ resource "azurerm_point_to_site_vpn_gateway" "this" {
 
   routing_preference_internet_enabled = var.p2s_gateway.routing_preference_internet_enabled
 
-  lifecycle {
-    ignore_changes = [
-      connection_configuration,
-    ]
-  }
-
-  # lifecycle {
-  #   ignore_changes = [
-  #     connection_configuration,
-  #   ]
-  # }
-
   tags = merge(
     try(var.tags, {}),
     tomap({

@@ -113,7 +113,7 @@ The Point-to-Site VPN Gateway configuration.
 
 variable "internet_security_enabled" {
   type        = bool
-  default     = null
+  default     = true
   description = <<DESCRIPTION
     Whether internet security is enabled for the Point-to-Site VPN Gateway connections, it will include/remove 0.0.0.0/0 in the route table.
     Although it seems you can set this per connection, this is not the case.
@@ -133,9 +133,6 @@ variable "p2s_configuration" {
         ids    = list(string)
       })
     }), null)
-    configuration_policy_group_associations = optional(list(object({
-      id = string
-    })), null)
   }))
   description = <<DESCRIPTION
 The connection configuration for the Point-to-Site VPN Gateway.
@@ -149,8 +146,6 @@ The connection configuration for the Point-to-Site VPN Gateway.
     `propagated_route_table` - (Required) The propagated route table configuration.
       `labels` - (Optional) A list of labels for the propagated route table.
       `ids` - (Required) A list of IDs for the propagated route table.
-  `configuration_policy_group_associations` - (Optional) A list of configuration policy group associations.
-    `id` - (Required) The ID of the configuration policy group.
 
 DESCRIPTION
 }
