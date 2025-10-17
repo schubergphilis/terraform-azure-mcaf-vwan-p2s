@@ -34,11 +34,11 @@ resource "azurerm_vpn_server_configuration" "this" {
   }
 
   dynamic "radius" {
-    for_each = [1]
+    for_each = var.vpn_server_configuration.radius != null ? [1] : []
 
     content {
       dynamic "server" {
-        for_each = try(var.vpn_server_configuration.radius.server, [])
+        for_each = var.vpn_server_configuration.radius.server
 
         content {
           address = server.value.address
@@ -48,7 +48,7 @@ resource "azurerm_vpn_server_configuration" "this" {
       }
 
       dynamic "client_root_certificate" {
-        for_each = try(var.vpn_server_configuration.radius.client_root_certificate, [])
+        for_each = var.vpn_server_configuration.radius.client_root_certificate != null ? var.vpn_server_configuration.radius.client_root_certificate : []
 
         content {
           name       = client_root_certificate.value.name
@@ -57,7 +57,7 @@ resource "azurerm_vpn_server_configuration" "this" {
       }
 
       dynamic "server_root_certificate" {
-        for_each = try(var.vpn_server_configuration.radius.server_root_certificate, [])
+        for_each = var.vpn_server_configuration.radius.server_root_certificate != null ? var.vpn_server_configuration.radius.server_root_certificate : []
 
         content {
           name             = server_root_certificate.value.name
