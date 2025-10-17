@@ -109,42 +109,120 @@ resource "azurerm_vpn_server_configuration_policy_group" "this" {
   }
 }
 
-resource "azurerm_point_to_site_vpn_gateway" "this" {
-  resource_group_name         = var.resource_group_name
-  location                    = var.location
-  name                        = var.p2s_gateway.name
-  virtual_hub_id              = var.virtual_hub_id
-  vpn_server_configuration_id = azurerm_vpn_server_configuration.this.id
-  scale_unit                  = var.p2s_gateway.scale_unit
-  dns_servers                 = var.p2s_gateway.dns_servers
+# uncommented for now, since this does not work well with policy group associations.
+# resource "azurerm_point_to_site_vpn_gateway" "this" {
+#   resource_group_name         = var.resource_group_name
+#   location                    = var.location
+#   name                        = var.p2s_gateway.name
+#   virtual_hub_id              = var.virtual_hub_id
+#   vpn_server_configuration_id = azurerm_vpn_server_configuration.this.id
+#   scale_unit                  = var.p2s_gateway.scale_unit
+#   dns_servers                 = var.p2s_gateway.dns_servers
 
-  dynamic "connection_configuration" {
-    for_each = var.p2s_configuration != null ? var.p2s_configuration : {}
+#   dynamic "connection_configuration" {
+#     for_each = var.p2s_configuration != null ? var.p2s_configuration : {}
 
-    content {
-      name                      = connection_configuration.value.name
-      internet_security_enabled = var.internet_security_enabled
+#     content {
+#       name                      = connection_configuration.value.name
+#       internet_security_enabled = var.internet_security_enabled
 
-      vpn_client_address_pool {
-        address_prefixes = connection_configuration.value.vpn_client_address_pool.address_prefixes
+#       vpn_client_address_pool {
+#         address_prefixes = connection_configuration.value.vpn_client_address_pool.address_prefixes
+#       }
+
+#       dynamic "route" {
+#         for_each = connection_configuration.value.route != null ? [1] : []
+
+#         content {
+#           associated_route_table_id = connection_configuration.value.route.associated_route_table_id
+
+#           propagated_route_table {
+#             labels = connection_configuration.value.route.propagated_route_table.labels
+#             ids    = connection_configuration.value.route.propagated_route_table.ids
+#           }
+#         }
+#       }
+#     }
+#   }
+
+#   routing_preference_internet_enabled = var.p2s_gateway.routing_preference_internet_enabled
+
+#   tags = merge(
+#     try(var.tags, {}),
+#     tomap({
+#       "Resource Type" = "Point-to-Site VPN Gateway"
+#     })
+#   )
+# }
+
+
+data "azurerm_subscription" "current" {}
+resource "azapi_resource" "p2s_vpn_gateway" {
+  type      = "Microsoft.Network/p2sVpnGateways@2024-10-01"
+  parent_id = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resource_group_name}"
+  location  = var.location
+  name      = var.p2s_gateway.name
+
+  body = {
+    properties = {
+      virtualHub = {
+        id = var.virtual_hub_id
       }
-
-      dynamic "route" {
-        for_each = connection_configuration.value.route != null ? [1] : []
-
-        content {
-          associated_route_table_id = connection_configuration.value.route.associated_route_table_id
-
-          propagated_route_table {
-            labels = connection_configuration.value.route.propagated_route_table.labels
-            ids    = connection_configuration.value.route.propagated_route_table.ids
-          }
+      vpnServerConfiguration = {
+        id = azurerm_vpn_server_configuration.this.id
+      }
+      vpnGatewayScaleUnit         = var.p2s_gateway.scale_unit
+      customDnsServers            = var.p2s_gateway.dns_servers
+      isRoutingPreferenceInternet = var.p2s_gateway.routing_preference_internet_enabled
+      p2SConnectionConfigurations = [
+        for key, config in(var.p2s_configuration != null ? var.p2s_configuration : {}) : {
+          name = config.name
+          properties = merge(
+            {
+              vpnClientAddressPool = {
+                addressPrefixes = config.vpn_client_address_pool.address_prefixes
+              }
+              enableInternetSecurity = var.internet_security_enabled
+            },
+            config.route != null ? {
+              routingConfiguration = merge(
+                {
+                  associatedRouteTable = {
+                    id = config.route.associated_route_table_id
+                  }
+                  propagatedRouteTables = {
+                    labels = config.route.propagated_route_table.labels
+                    ids = [
+                      for route_table_id in config.route.propagated_route_table.ids : {
+                        id = route_table_id
+                      }
+                    ]
+                  }
+                },
+                config.route.inbound_route_map_id != null ? {
+                  inboundRouteMap = {
+                    id = config.route.inbound_route_map_id
+                  }
+                } : {},
+                config.route.outbound_route_map_id != null ? {
+                  outboundRouteMap = {
+                    id = config.route.outbound_route_map_id
+                  }
+                } : {}
+              )
+            } : {},
+            config.configuration_policy_group_associations != null ? {
+              configurationPolicyGroupAssociations = [
+                for policy_group_key in config.configuration_policy_group_associations : {
+                  id = azurerm_vpn_server_configuration_policy_group.this[policy_group_key].id
+                }
+              ]
+            } : {}
+          )
         }
-      }
+      ]
     }
   }
-
-  routing_preference_internet_enabled = var.p2s_gateway.routing_preference_internet_enabled
 
   tags = merge(
     try(var.tags, {}),
@@ -152,4 +230,15 @@ resource "azurerm_point_to_site_vpn_gateway" "this" {
       "Resource Type" = "Point-to-Site VPN Gateway"
     })
   )
+
+  depends_on = [
+    azurerm_vpn_server_configuration.this,
+    azurerm_vpn_server_configuration_policy_group.this
+  ]
+}
+
+# Migration from azurerm provider to azapi provider for P2S VPN Gateway, due to issues with group assigenments
+moved {
+  from = azurerm_point_to_site_vpn_gateway.this
+  to   = azapi_resource.p2s_vpn_gateway
 }

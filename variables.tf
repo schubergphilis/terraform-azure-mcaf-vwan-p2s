@@ -132,7 +132,10 @@ variable "p2s_configuration" {
         labels = optional(list(string), ["none"])
         ids    = list(string)
       })
+      inbound_route_map_id  = optional(string, null)
+      outbound_route_map_id = optional(string, null)
     }), null)
+    configuration_policy_group_associations = optional(list(string), null)
   }))
   description = <<DESCRIPTION
 The connection configuration for the Point-to-Site VPN Gateway.
@@ -146,6 +149,9 @@ The connection configuration for the Point-to-Site VPN Gateway.
     `propagated_route_table` - (Required) The propagated route table configuration.
       `labels` - (Optional) A list of labels for the propagated route table.
       `ids` - (Required) A list of IDs for the propagated route table.
+    `inbound_route_map_id` - (Optional) The ID of the inbound route map.
+    `outbound_route_map_id` - (Optional) The ID of the outbound route map.
+  `configuration_policy_group_associations` - (Optional) A list of policy group keys that match keys in the vpn_server_policy_group map.
 
 DESCRIPTION
 }

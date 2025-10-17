@@ -5,5 +5,5 @@ output "vpn_server_id" {
 
 output "p2s_gateway_id" {
   description = "The ID of the Point-to-Site VPN Gateway."
-  value       = azurerm_point_to_site_vpn_gateway.this.id
+  value       = azapi_resource.p2s_vpn_gateway.id
 }
