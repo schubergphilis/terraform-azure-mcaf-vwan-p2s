@@ -13,6 +13,30 @@ variable "virtual_hub_id" {
   type        = string
 }
 
+variable "internet_security_enabled" {
+  type        = bool
+  default     = true
+  description = "Global default for forced tunneling (adds 0.0.0.0/0 route). true = All client traffic through VPN, false = Split tunnel. Per-configuration internet_security_enabled in p2s_configuration overrides this when set."
+}
+
+variable "p2s_gateway" {
+  type = object({
+    name                                = optional(string, "p2s")
+    routing_preference_internet_enabled = optional(bool, false)
+    dns_servers                         = optional(list(string), [])
+    scale_unit                          = optional(number, 1)
+  })
+  description = <<DESCRIPTION
+The Point-to-Site VPN Gateway configuration.
+
+  `name` - (Optional) The name of the Point-to-Site VPN Gateway.
+  `routing_preference_internet_enabled` - (Optional) Whether the Point-to-Site VPN Gateway should be enabled for internet routing or MS Backbone routing.
+  `dns_servers` - (Optional) A list of DNS Servers to be used by the Point-to-Site VPN Gateway.
+  `scale_unit` - (Optional) The scale unit of the Point-to-Site VPN Gateway.
+
+  DESCRIPTION
+}
+
 variable "vpn_server_configuration" {
   type = object({
     name                     = string
@@ -93,33 +117,6 @@ A VPN Server Configuration block supports the following:
   }
 }
 
-variable "p2s_gateway" {
-  type = object({
-    name                                = optional(string, "p2s")
-    routing_preference_internet_enabled = optional(bool, false)
-    dns_servers                         = optional(list(string), [])
-    scale_unit                          = optional(number, 1)
-  })
-  description = <<DESCRIPTION
-The Point-to-Site VPN Gateway configuration.
-
-  `name` - (Optional) The name of the Point-to-Site VPN Gateway.
-  `routing_preference_internet_enabled` - (Optional) Whether the Point-to-Site VPN Gateway should be enabled for internet routing.
-  `dns_servers` - (Optional) A list of DNS Servers to be used by the Point-to-Site VPN Gateway.
-  `scale_unit` - (Optional) The scale unit of the Point-to-Site VPN Gateway.
-
-  DESCRIPTION
-}
-
-variable "internet_security_enabled" {
-  type        = bool
-  default     = true
-  description = <<DESCRIPTION
-    Whether internet security is enabled for the Point-to-Site VPN Gateway connections, it will include/remove 0.0.0.0/0 in the route table.
-    Although it seems you can set this per connection, this is not the case.
-  DESCRIPTION
-}
-
 variable "p2s_configuration" {
   type = map(object({
     name = optional(string, "P2SConnectionConfigDefault")
@@ -132,13 +129,17 @@ variable "p2s_configuration" {
         labels = optional(list(string), ["none"])
         ids    = list(string)
       })
+      inbound_route_map_id  = optional(string, null)
+      outbound_route_map_id = optional(string, null)
     }), null)
+    configuration_policy_group_associations = optional(list(string), null)
+    internet_security_enabled               = optional(bool, null) # null = use global default
   }))
+  default     = null
   description = <<DESCRIPTION
 The connection configuration for the Point-to-Site VPN Gateway.
 
   `name` - (Optional) The name of the connection configuration.
-  `internet_security_enabled` - (Optional) Whether internet security is enabled for the connection configuration.
   `vpn_client_address_pool` - (Required) The VPN Client Address Pool configuration.
     `address_prefixes` - (Required) A list of address prefixes for the VPN Client Address Pool.
   `route` - (Optional) The route configuration for the connection configuration.
@@ -146,8 +147,14 @@ The connection configuration for the Point-to-Site VPN Gateway.
     `propagated_route_table` - (Required) The propagated route table configuration.
       `labels` - (Optional) A list of labels for the propagated route table.
       `ids` - (Required) A list of IDs for the propagated route table.
+    `inbound_route_map_id` - (Optional) The ID of the inbound route map.
+    `outbound_route_map_id` - (Optional) The ID of the outbound route map.
+  `configuration_policy_group_associations` - (Optional) A list of policy group keys that match keys in the vpn_server_policy_group map.
+    the higher the priority (lower number), the earlier it is evaluated. 0 is highest priority and evaluated first.
+  `internet_security_enabled` - (Optional) Whether internet security is enabled for this connection configuration.
+    When null, uses the global internet_security_enabled variable. Defaults to null.
 
-DESCRIPTION
+  DESCRIPTION
 }
 
 variable "vpn_server_policy_group" {
@@ -163,7 +170,7 @@ variable "vpn_server_policy_group" {
   }))
   default     = null
   description = <<DESCRIPTION
-A policy block supports the following:
+A VPN Server Configuration Policy Group defines access control rules for P2S connections.
 
   `name` - (Required) The Name which should be used for this VPN Server Configuration Policy Group. Changing this forces a new resource to be created.
   `is_default` - (Optional) Is this the default VPN Server Configuration Policy Group, there can only be one, Changing this forces a new resource to be created.
@@ -174,7 +181,6 @@ A policy block supports the following:
     `value` - (Required) The value of the attribute that is used for the VPN Server Configuration Policy member.
   DESCRIPTION
 }
-
 variable "tags" {
   description = "A map of tags to assign to the resources."
   type        = map(string)

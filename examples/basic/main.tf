@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = ">= 4.0"
     }
+    azapi = {
+      source  = "Azure/azapi"
+      version = ">= 2.0"
+    }
   }
 }
 
@@ -14,6 +18,7 @@ data "azurerm_client_config" "current" {}
 locals {
   tags = tomap({
     "deploymentmodel" = "Terraform",
+    "environment"     = "demo",
   })
 }
 
@@ -61,65 +66,51 @@ module "p2s" {
   location            = "westeurope"
   virtual_hub_id      = module.vwan.vhub_ids["weu"]
 
+  # VPN Server Configuration - AAD authentication (bare minimum)
   vpn_server_configuration = {
-    name                     = "vpnserverconfig"
-    vpn_authentication_types = ["AAD"]
+    name = "vpnserverconfig"
     azure_active_directory_authentication = {
       audience = "c632b3df-fb67-4d84-bdcf-b95ad541b5c8"
       tenantid = data.azurerm_client_config.current.tenant_id
     }
   }
 
+  # P2S Gateway - minimal required configuration
   p2s_gateway = {
-    name        = "vpnserverconfig-p2s"
-    dns_servers = ["10.10.0.132"]
+    name = "vpnserverconfig-p2s"
   }
 
+  # VPN Server Policy Groups - access control rules
   vpn_server_policy_group = {
-    others = {
-      name       = "engineers"
-      is_default = false
+    default = {
+      name       = "AllUsers"
+      is_default = true
       priority   = 0
       policy = {
         "1" = {
-          name  = "<AD-Group-Name>"
+          name  = "AllUsers"
           type  = "AADGroupId"
-          value = "00000000-0000-0000-0000-000000000000"
-        }
-      }
-    }
-    #Should be the last one, since it will be de default
-    default = {
-      name       = "honeycomb"
-      is_default = true
-      priority   = 1
-      policy = {
-        "1" = {
-          name  = "honeycomb"
-          type  = "AADGroupId"
-          value = "11111111-1111-1111-1111-111111111111"
+          value = "00000000-0000-0000-0000-000000000000" # Replace with your AD Group Object ID
         }
       }
     }
   }
 
+  # P2S Connection Configurations - IP pools and routing
   p2s_configuration = {
-    others = {
-      name = "Engineers"
+    default = {
+      name = "Default"
       vpn_client_address_pool = {
         address_prefixes = ["10.10.10.0/24"]
       }
+      configuration_policy_group_associations = ["default"]
+
+      # Optional: Add routing configuration if needed
       route = {
         associated_route_table_id = module.vwan.vhub_default_route_table_ids["weu"]
         propagated_route_table = {
-          ids = ["${module.vwan.vhub_ids["weu"]}/hubRouteTables/noneRouteTable"]
+          ids = [module.vwan.vhub_default_route_table_ids["weu"]]
         }
-      }
-    }
-    default = {
-      name = "honeycomb"
-      vpn_client_address_pool = {
-        address_prefixes = ["10.10.11.0/25"]
       }
     }
   }
