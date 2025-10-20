@@ -381,8 +381,8 @@ output "p2s_gateway_id" {
 output "vpn_profiles" {
   description = "Configured VPN Profiles"
   value = {
-    server_id      = module.p2s_advanced.vpn_server_id
-    gateway_id     = module.p2s_advanced.p2s_gateway_id
-    policy_groups  = module.p2s_advanced.policy_group_ids
+    server_id     = module.p2s_advanced.vpn_server_id
+    gateway_id    = module.p2s_advanced.p2s_gateway_id
+    policy_groups = module.p2s_advanced.policy_group_ids
   }
 }

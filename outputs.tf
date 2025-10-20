@@ -34,10 +34,10 @@ output "vpn_profiles" {
   description = "Map of configured VPN profiles with their address pools."
   value = var.p2s_configuration != null ? {
     for key, config in var.p2s_configuration : key => {
-      name                 = config.name
-      address_pool         = config.vpn_client_address_pool.address_prefixes
-      has_routing          = config.route != null
-      policy_associations  = try(config.configuration_policy_group_associations, [])
+      name                = config.name
+      address_pool        = config.vpn_client_address_pool.address_prefixes
+      has_routing         = config.route != null
+      policy_associations = try(config.configuration_policy_group_associations, [])
     }
   } : {}
 }

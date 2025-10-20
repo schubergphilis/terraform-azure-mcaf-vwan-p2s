@@ -130,8 +130,8 @@ module "p2s_certificate" {
       priority   = 0
       policy = {
         "1" = {
-          name  = "AllCertUsers"
-          type  = "CertificateGroupId"
+          name = "AllCertUsers"
+          type = "CertificateGroupId"
           # Match certificates with this OU in the subject
           # Example cert subject: "CN=user@contoso.com,OU=VPN Users,DC=contoso,DC=com"
           value = "OU=VPN Users,DC=contoso,DC=com"
@@ -146,8 +146,8 @@ module "p2s_certificate" {
       priority   = 1
       policy = {
         "1" = {
-          name  = "AdminCertUsers"
-          type  = "CertificateGroupId"
+          name = "AdminCertUsers"
+          type = "CertificateGroupId"
           # Match certificates with this OU in the subject
           value = "OU=VPN Admins,DC=contoso,DC=com"
         }
@@ -200,8 +200,8 @@ module "p2s_certificate" {
   tags = merge(
     local.tags,
     tomap({
-      "Component"        = "P2S VPN Gateway",
-      "Authentication"   = "Certificate"
+      "Component"      = "P2S VPN Gateway",
+      "Authentication" = "Certificate"
     })
   )
 }
@@ -219,7 +219,7 @@ output "p2s_gateway_id" {
 
 output "certificate_instructions" {
   description = "Instructions for generating and using client certificates"
-  value = <<-EOT
+  value       = <<-EOT
 
     CERTIFICATE SETUP INSTRUCTIONS:
 
