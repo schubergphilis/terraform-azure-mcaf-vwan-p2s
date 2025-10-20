@@ -109,7 +109,7 @@ module "p2s_advanced" {
   vpn_server_configuration = {
     name                     = "vpnserverconfig-advanced"
     vpn_authentication_types = ["AAD", "Certificate", "Radius"]
-    vpn_protocols            = ["OpenVPN", "IkeV2"]
+    vpn_protocols            = ["Ikev2", "OpenVPN"]
 
     # Azure Active Directory authentication
     azure_active_directory_authentication = {
