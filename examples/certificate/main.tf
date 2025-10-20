@@ -69,7 +69,7 @@ module "p2s_certificate" {
   vpn_server_configuration = {
     name                     = "vpnserverconfig-cert"
     vpn_authentication_types = ["Certificate"] # Certificate-only authentication
-    vpn_protocols            = ["OpenVPN", "IkeV2"]
+    vpn_protocols            = ["OpenVPN", "Ikev2"]
 
     # Root certificate for validating client certificates
     # Generate using: makecert, OpenSSL, or your PKI infrastructure
