@@ -1,3 +1,9 @@
+<!-- migrate-repo:banner -->
+> [!IMPORTANT]
+> **This repository has moved to [`schubergphilis-ep/terraform-azure-mcaf-vwan-p2s`](https://github.com/schubergphilis-ep/terraform-azure-mcaf-vwan-p2s).**
+> Please update your references and use the new location for issues, PRs, and contributions.
+<!-- migrate-repo:banner -->
+
 # terraform-azure-mcaf-vwan-p2s
 
 Azure Terraform module to configure Point-to-Site VPN for Azure Virtual WAN.
